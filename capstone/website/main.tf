@@ -33,13 +33,14 @@ module "autoscale" {
 
   region         = var.region
   project        = var.project
-  startup_script = "capstone.sh"
+  capstone_script = "capstone.sh"
 
   image_id = "ami-0b86aaed8ef90e45f"
   instance_type      = "t2.micro"
   instance_count_min = 1
   instance_count_max = 10
   add_public_ip      = true
+  capstone_target_arn = module.elb.capstone_target_arn
 
   subnet_a_id = module.vpc.subnet_a_id
   subnet_b_id = module.vpc.subnet_b_id

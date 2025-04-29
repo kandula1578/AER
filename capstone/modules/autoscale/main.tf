@@ -3,6 +3,8 @@ resource "aws_launch_template" "capstone" {
   image_id      = var.image_id
   instance_type = var.instance_type
   vpc_security_group_ids = [var.security_group_id]
+  user_data = base64encode(file(var.capstone_script))
+
 
 
   iam_instance_profile {
@@ -23,6 +25,7 @@ resource "aws_autoscaling_group" "capstone" {
   name                      = "capstone"
   min_size                  = 1
   max_size                  = 3
+  health_check_type         = "ELB"
   health_check_grace_period = 300
   desired_capacity          = 1
   vpc_zone_identifier       = [
@@ -43,6 +46,11 @@ resource "aws_autoscaling_group" "capstone" {
     value               = "${var.project}-webserver"
     propagate_at_launch = true
   }
+}
+
+resource "aws_autoscaling_attachment" "coturn_server" {
+  autoscaling_group_name = aws_autoscaling_group.capstone.id
+  lb_target_group_arn    = var.capstone_target_arn
 }
 
 resource "aws_iam_instance_profile" "capstone" {
